@@ -23,7 +23,7 @@ namespace grafy
         public Form1()
         {
             InitializeComponent();
-            
+            //InitData();
 
         }
 
@@ -33,19 +33,44 @@ namespace grafy
             cartesianChart1.AxisX.Add(new Axis
             {
                 Title = "Měsíc",
-                Labels = new [] {"Leden","Unor","Březen","Duben"}
-            }) ;
+                Labels = new[] { "Leden", "Unor", "Březen", "Duben" }
+            });
             cartesianChart1.AxisY.Add(new Axis
             {
                 Title = "Hodnota",
                 LabelFormatter = value => value.ToString("C")
-            }) ;
+            });
             cartesianChart1.LegendLocation = LegendLocation.Right;
         }
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
-            //Init data
+
+        }
+
+        private void datovybodBindingSource1_CurrentChanged(object sender, EventArgs e)
+        {
+            UpgradeGraph();
+        }
+
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            UpgradeGraph();
+        }
+
+        private void InitData()
+        {
+            //TODO: zprovoznit!!!!
+            dataGridView1.Rows[0].Cells[0].Value = "2020";
+            dataGridView1.Rows[0].Cells[1].Value = "10";
+            dataGridView1.Rows[0].Cells[2].Value = "15";
+        }
+
+        private void UpgradeGraph()
+        {
+            if (datovybodBindingSource.DataSource == null) return;
+
             cartesianChart1.Series.Clear();
             SeriesCollection series = new SeriesCollection();
             var years = (from o in datovybodBindingSource.DataSource as List<Datovybod>
@@ -60,18 +85,16 @@ namespace grafy
                                where o.year.Equals(year.Year) && o.month.Equals(month)
                                orderby o.month ascending
                                select new { o.value, o.month };
+                    //TODO: ošetřit více měsíců v jednom roce
                     if (data.SingleOrDefault() != null)
                         value = data.SingleOrDefault().value;
                     values.Add(value);
                 }
-                series.Add(new LineSeries() { Title = year.Year.ToString(), Values = new ChartValues<double>(values) });
+                //series.Add(new LineSeries() { Title = year.Year.ToString(), Values = new ChartValues<double>(values) });
+                series.Add(new ColumnSeries() { Title = year.Year.ToString(), Values = new ChartValues<double>(values) });
+
             }
             cartesianChart1.Series = series;
-        }
-
-        private void datovybodBindingSource1_CurrentChanged(object sender, EventArgs e)
-        {
-
         }
     }
 
